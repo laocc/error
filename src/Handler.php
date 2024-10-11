@@ -228,7 +228,6 @@ class Handler extends espHandler
      * @param array $prev
      * @param string $path
      * @param string $filename
-     * @throws Error
      */
     private function error(array $error, array $prev, string $path, string $filename): void
     {

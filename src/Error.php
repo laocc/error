@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace esp\error;
 
 use Exception;
+use Throwable;
 
 /*
  * 用于运行中抛出异常
@@ -22,6 +23,12 @@ class Error extends Exception
             $this->file = $message['file'] ?? '';
             $this->line = $message['line'] ?? 0;
             $this->message = $message['message'] ?? (json_encode($message, 256 | 64 | 128));
+
+        } else if ($message instanceof Throwable) {
+            $this->file = $message->getFile();
+            $this->line = $message->getLine();
+            $this->message = $message->getMessage();
+
         } else {
             if ($trace > 10) $trace = 1;
             $pre = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $trace + 1)[$trace] ?? [];
