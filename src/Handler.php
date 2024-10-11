@@ -5,11 +5,15 @@ namespace esp\error;
 
 use Throwable;
 use esp\debug\Debug;
+use esp\core\Handler as espHandler;
 use function esp\helper\displayState;
 use function esp\helper\mk_dir;
 use function esp\helper\replace_array;
 
-class Handler
+/**
+ * 用于esp启动时注册异常处理程序
+ */
+class Handler extends espHandler
 {
     private bool $restrain;//同一错误只记录一次，防止突发很多相同错误，而把磁盘撑爆
     private Debug $debug;
@@ -266,7 +270,7 @@ class Handler
             'time' => date('Y-m-d H:i:s'),
             'HOST' => getenv('HTTP_HOST'),
             'Url' => _URL,
-            'Debug' => isset($this->debug) ? $this->debug->filename() : '',
+            'Debug' => '',//如果存在Debug，后面写入文件
             'errKey' => $md5Key,
             'Error' => $error,
             'Server' => $_SERVER,
@@ -278,6 +282,7 @@ class Handler
 
         if (isset($this->debug)) {
             //这里不能再继续加shutdown，因为有可能运行到这里已经处于shutdown内
+            $info['Debug'] = $this->debug->filename();
             $this->debug->relay($info['Error']['message'], -1, $prev);
             $sl = $this->debug->save_logs('by Error Saved');
             $info['debugLogSaveRest'] = $sl;

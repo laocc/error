@@ -5,6 +5,10 @@ namespace esp\error;
 
 use Exception;
 
+/*
+ * 用于运行中抛出异常
+ */
+
 class Error extends Exception
 {
     protected $context = null;
