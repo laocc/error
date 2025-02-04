@@ -95,10 +95,12 @@ class Handler extends espHandler
             switch (true) {
                 case _CLI:
                     echo "\n\e[40;31;m================ERROR=====================\e[0m\n";
+                    header("Content-type: text/plain; charset=UTF-8", true, 200);
                     print_r($error);
                     break;
 
                 case is_int($option['display']):
+                    header("Content-type: text/html; charset=UTF-8", true, 200);
                     if ($option['display'] === 0) {
                         echo displayState($error->getCode());
                     } else {
@@ -108,20 +110,23 @@ class Handler extends espHandler
 
                 case ($option['display'] === 'json'):
                 case ($ajax or $post):
+                    header("Content-type: application/json; charset=UTF-8", true, 200);
                     unset($err['trace'], $err['context']);
                     echo json_encode($err, 256 | 128 | 64);
                     break;
 
                 case ($option['display'] === 'html'):
+                    header("Content-type: text/html; charset=UTF-8", true, 200);
                     $this->displayError($err);
                     break;
 
                 default:
+                    header("Content-type: text/html; charset=UTF-8", true, 200);
                     echo $option['display'];
             }
 
             fastcgi_finish_request();
-            exit;
+//            exit;
             /**
              * 这里必须要结束，以阻止程序继续执行，
              * 同时也是切断debug类中shutdown中保存日志
@@ -166,6 +171,7 @@ class Handler extends espHandler
                     break;
 
                 case is_int($option['display']):
+                    header("Content-type: text/html; charset=UTF-8", true, 200);
                     if ($option['display'] === 0) {
                         echo displayState($error->getCode());
                     } else {
@@ -175,20 +181,23 @@ class Handler extends espHandler
 
                 case ($option['display'] === 'json'):
                 case ($ajax or $post):
+                    header("Content-type: application/json; charset=UTF-8", true, 200);
                     unset($err['trace'], $err['context']);
                     echo json_encode($err, 256 | 128 | 64);
                     break;
 
                 case ($option['display'] === 'html'):
+                    header("Content-type: text/html; charset=UTF-8", true, 200);
                     $this->displayError($err);
                     break;
 
                 default:
+                    header("Content-type: text/html; charset=UTF-8", true, 200);
                     echo $option['display'];
             }
 
             fastcgi_finish_request();
-            exit;
+//            exit;
         };
 
         /**
@@ -228,6 +237,7 @@ class Handler extends espHandler
      * @param array $prev
      * @param string $path
      * @param string $filename
+     * @throws Error
      */
     private function error(array $error, array $prev, string $path, string $filename): void
     {
