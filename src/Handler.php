@@ -243,9 +243,9 @@ class Handler extends espHandler
     {
         $md5Key = md5(($error['message'] ?? '') . ($error['file'] ?? ''));
 
-        if ($this->restrain) {
+        if ($this->restrain) {//同一错误只记录一次
 
-            $errLogFile = "{$path}/{$md5Key}.md";
+            $errLogFile = "{$path}/{$md5Key}.json";
 
             if (is_readable($errLogFile)) {
                 if (isset($this->debug)) $this->debug->disable();
