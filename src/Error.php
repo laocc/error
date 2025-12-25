@@ -43,8 +43,6 @@ class Error extends Exception
                 $this->message = $message;
             }
         }
-
-//        parent::__construct($this->message, 0, $trace);
     }
 
     public function display(bool $trace = false): array
