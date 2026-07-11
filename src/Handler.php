@@ -19,6 +19,7 @@ class Handler extends espHandler
     private Debug $debug;
     private $ignoreCallback;
     private $callable;
+    private array $callParam;
 
     public function __construct(array $option, callable $ignoreCallback)
     {
@@ -42,7 +43,7 @@ class Handler extends espHandler
             http_response_code(500);
 
             if (isset($this->callable) and is_callable($this->callable)) {
-                call_user_func($this->callable, $err);
+                call_user_func($this->callable, $err, ...$this->callParam);
             }
 
             header("Status: 500 Internal Server Error", true);
@@ -52,7 +53,9 @@ class Handler extends espHandler
             http_response_code(500);
 
             if (isset($this->callable) and is_callable($this->callable)) {
-                call_user_func($this->callable, ['error' => $error->getCode(), 'message' => $error->getMessage()]);
+                call_user_func($this->callable,
+                    ['error' => $error->getCode(), 'message' => $error->getMessage()],
+                    ...$this->callParam);
             }
 
             header("Status: 500 Internal Server Error", true);
@@ -62,11 +65,13 @@ class Handler extends espHandler
 
     /**
      * @param callable $callable
+     * @param mixed ...$param
      * @return void
      */
-    public function onError(callable $callable)
+    public function onError(callable $callable, ...$param)
     {
         $this->callable = $callable;
+        $this->callParam = $param;
     }
 
     /**
@@ -108,7 +113,7 @@ class Handler extends espHandler
             $error = new Error($prev);
 
             if (isset($this->callable) and is_callable($this->callable)) {
-                call_user_func($this->callable, $prev);
+                call_user_func($this->callable, $prev, ...$this->callParam);
             }
 
             $err = array();
@@ -192,7 +197,7 @@ class Handler extends espHandler
             $prev = ['file' => $errFile, 'line' => $errLine];
 
             if (isset($this->callable) and is_callable($this->callable)) {
-                call_user_func($this->callable, $err);
+                call_user_func($this->callable, $err, ...$this->callParam);
             }
 
             if ($ignore) return;
