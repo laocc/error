@@ -18,6 +18,7 @@ class Handler extends espHandler
     private bool $restrain;//同一错误只记录一次，防止突发很多相同错误，而把磁盘撑爆
     private Debug $debug;
     private $ignoreCallback;
+    private $callable;
 
     public function __construct(array $option, callable $ignoreCallback)
     {
@@ -50,6 +51,24 @@ class Handler extends espHandler
     }
 
     /**
+     * @param callable $callable
+     * @return void
+     */
+    public function onError(callable $callable)
+    {
+        $this->callable = $callable;
+    }
+
+    /**
+     * 由于error的创建要早于debug，所以要在debug创建成功时，送入自己
+     * @param Debug $debug
+     */
+    public function setDebug(Debug $debug): void
+    {
+        $this->debug = $debug;
+    }
+
+    /**
      * @param $option
      * 显示程度:0=不显示,1=简单,2=完整
      */
@@ -77,6 +96,10 @@ class Handler extends espHandler
 
             $prev = ['message' => $errStr, 'code' => $errNo, 'file' => $errFile, 'line' => $errLine];
             $error = new Error($prev);
+
+            if (isset($this->callable) and is_callable([$this, 'callable'])) {
+                call_user_func($this->callable, $prev);
+            }
 
             $err = array();
             $err['err_type'] = 'register_handler';
@@ -146,7 +169,6 @@ class Handler extends espHandler
             $errFile = $error->getFile();
             $errLine = $error->getLine();
             $ignore = call_user_func($this->ignoreCallback, $errFile, $errLine);
-            if ($ignore) return;
 
             $err = array();
             $err['err_type'] = 'handler_exception';
@@ -158,6 +180,12 @@ class Handler extends espHandler
             $err['file'] = $this->filter_root($errFile) . "({$errLine})";
             $err['trace'] = $error->getTrace();
             $prev = ['file' => $errFile, 'line' => $errLine];
+
+            if (isset($this->callable) and is_callable([$this, 'callable'])) {
+                call_user_func($this->callable, $err);
+            }
+
+            if ($ignore) return;
 
             //debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]
             $this->error($err, $prev, $option['path'], $option['filename']);
@@ -219,16 +247,6 @@ class Handler extends espHandler
          * 3，throw new Error('抛出的异常');
          */
         set_exception_handler($handler_exception);
-    }
-
-
-    /**
-     * 由于error的创建要早于debug，所以要在debug创建成功时，送入自己
-     * @param Debug $debug
-     */
-    public function setDebug(Debug $debug): void
-    {
-        $this->debug = $debug;
     }
 
     /**
