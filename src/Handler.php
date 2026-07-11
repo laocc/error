@@ -40,11 +40,21 @@ class Handler extends espHandler
     {
         set_error_handler(function (...$err) {
             http_response_code(500);
+
+            if (isset($this->callable) and is_callable($this->callable)) {
+                call_user_func($this->callable, $err);
+            }
+
             header("Status: 500 Internal Server Error", true);
             echo("[{$err[0]}]{$err[1]}");
         });
         set_exception_handler(function (Throwable $error) {
             http_response_code(500);
+
+            if (isset($this->callable) and is_callable($this->callable)) {
+                call_user_func($this->callable, ['error' => $error->getCode(), 'message' => $error->getMessage()]);
+            }
+
             header("Status: 500 Internal Server Error", true);
             echo("[{$error->getCode()}]{$error->getMessage()}");
         });
@@ -97,7 +107,7 @@ class Handler extends espHandler
             $prev = ['message' => $errStr, 'code' => $errNo, 'file' => $errFile, 'line' => $errLine];
             $error = new Error($prev);
 
-            if (isset($this->callable) and is_callable([$this, 'callable'])) {
+            if (isset($this->callable) and is_callable($this->callable)) {
                 call_user_func($this->callable, $prev);
             }
 
@@ -181,7 +191,7 @@ class Handler extends espHandler
             $err['trace'] = $error->getTrace();
             $prev = ['file' => $errFile, 'line' => $errLine];
 
-            if (isset($this->callable) and is_callable([$this, 'callable'])) {
+            if (isset($this->callable) and is_callable($this->callable)) {
                 call_user_func($this->callable, $err);
             }
 
