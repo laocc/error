@@ -40,6 +40,9 @@ class Handler extends espHandler
     public function simple_register_handler(): void
     {
         set_error_handler(function (...$err) {
+            //被 @ 抑制，或被 error_reporting 屏蔽的错误，不响应
+            if (!(error_reporting() & $err[0])) return;
+
             http_response_code(500);
 
             if (isset($this->callable) and is_callable($this->callable)) {
@@ -104,6 +107,9 @@ class Handler extends espHandler
          * @param int $errLine
          */
         $handler_error = function (int $errNo, string $errStr, string $errFile, int $errLine) use ($option) {
+            //被 @ 抑制，或被 error_reporting 屏蔽的错误，不响应
+            if (!(error_reporting() & $errNo)) return;
+
             $ignore = call_user_func($this->ignoreCallback, $errFile, $errLine);
             if ($ignore) return;
 
