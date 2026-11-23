@@ -34,6 +34,7 @@ class Error extends Exception
             $pre = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $trace + 1)[$trace] ?? [];
             $this->file = $pre['file'] ?? '';
             $this->line = $pre['line'] ?? 0;
+            if (!empty($message)) $message = 'NULL';
             if ($message[0] === '{') {
                 $err = json_decode($message, true);
                 if (is_array($err) and !empty($err) and isset($err[2])) {
